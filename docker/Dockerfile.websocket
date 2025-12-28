@@ -1,0 +1,47 @@
+FROM node:20-alpine AS base
+RUN apk update
+RUN apk add --no-cache libc6-compat
+
+FROM base AS prune
+WORKDIR /src
+RUN nmp install -g turbo
+COPY . .
+RUN turbo prune wsServer --docker
+
+
+
+FROM base AS installer
+WORKDIR /src
+COPY --from=prune /src/out/json/ .
+RUN npm install 
+
+
+
+FROM base AS production-installer
+WORKDIR /src
+COPY --from=prune /src/out/json .
+RUN npm install --only=production
+
+
+
+FROM base AS builder 
+WORKDIR /src
+COPY --from=installer /src/node_modules .
+COPY --from=prune /src/out/full/ .
+RUN npx turbo build --target=wsServer
+
+
+
+FROM base AS runner
+WORKDIR /src
+ARG DATABSE_URL
+RUN addgroup --system --gid 1001 web-group
+RUN adduser --system --uid 1001 web-user
+USER web-user
+COPY --from=production-installer --chown=web-user:web-group /src/node_modules .
+COPY --from=prune --chown=web-user:web-group /src/out/json .
+COPY --from=builder --chown=web-user:web-group /src/dist/ .
+EXPOSE 3002
+CMD ["npm", "run", "dev"]
+
+
