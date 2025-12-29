@@ -29,7 +29,9 @@ RUN npm install --only=production
 # stage 5
 FROM base AS builder
 WORKDIR /src
-COPY --from=installer /src/node_modules /src/node_modules
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+COPY --from=installer /src/node_modules ./node_modules
 COPY --from=prune /src/out/full .
 RUN npx turbo build --filter=backend
 
@@ -37,12 +39,13 @@ RUN npx turbo build --filter=backend
 # stage 6
 FROM base AS runner
 WORKDIR /src
-ARG DATABASE URL
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 RUN addgroup --system --gid 1001 web-user
 RUN adduser --system --uid 1001 web-user
 USER web-user
 COPY --from=installer-production --chown=web-user:web-group /src/node_modules ./node_modules
 COPY --from=prune --chown=web-user:web-group /src/out/json/ .
-COPY --from=builder --chown=web-user:web-group /src/apps/backend/dist/ .
+COPY --from=builder --chown=web-user:web-group /src/apps/backend/dist/ ./dist
 EXPOSE 3001
 CMD ["npm", "run", "dev"]

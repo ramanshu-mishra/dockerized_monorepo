@@ -6,15 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start" : "tsc && node dist/server.js",
-    "dev" : "node dist/server.js"
+    "start": "tsc && node dist/server.js",
+    "dev": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@repo/db" : "*",
-    "@repo/typescript-config" : "*"
+    "@repo/db": "*",
+    "@repo/typescript-config": "*",
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1"
   }
 }

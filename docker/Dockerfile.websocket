@@ -4,9 +4,9 @@ RUN apk add --no-cache libc6-compat
 
 FROM base AS prune
 WORKDIR /src
-RUN nmp install -g turbo
+RUN npm install -g turbo
 COPY . .
-RUN turbo prune wsServer --docker
+RUN turbo prune wsserver --docker
 
 
 
@@ -26,21 +26,24 @@ RUN npm install --only=production
 
 FROM base AS builder 
 WORKDIR /src
-COPY --from=installer /src/node_modules .
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+COPY --from=installer /src/node_modules ./node_modules
 COPY --from=prune /src/out/full/ .
-RUN npx turbo build --target=wsServer
+RUN npx turbo build --filter=wsserver
 
 
 
 FROM base AS runner
 WORKDIR /src
 ARG DATABSE_URL
+ENV DATABSE_URL=${DATABSE_URL}
 RUN addgroup --system --gid 1001 web-group
 RUN adduser --system --uid 1001 web-user
 USER web-user
-COPY --from=production-installer --chown=web-user:web-group /src/node_modules .
+COPY --from=production-installer --chown=web-user:web-group /src/node_modules ./node_modules
 COPY --from=prune --chown=web-user:web-group /src/out/json .
-COPY --from=builder --chown=web-user:web-group /src/dist/ .
+COPY --from=builder --chown=web-user:web-group /src/dist/ ./dist
 EXPOSE 3002
 CMD ["npm", "run", "dev"]
 
