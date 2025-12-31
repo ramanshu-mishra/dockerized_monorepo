@@ -20,6 +20,8 @@ jobs:
 
       - name: build and push
         uses: docker/build-push-action@v6
+        build-args:
+          - DATABASE_URL=${{secrets.DATABASE_URL}}
         with:
           context: .
           push: true

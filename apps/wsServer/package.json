@@ -13,6 +13,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@repo/db": "*",
+    "@repo/typescript-config": "*",
     "@types/ws": "^8.18.1"
   }
 }

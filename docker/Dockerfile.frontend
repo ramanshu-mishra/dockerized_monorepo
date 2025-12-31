@@ -44,8 +44,8 @@ RUN adduser --system --uid 1001 web-user
 USER web-user
 COPY --from=installer-production --chown=web-user:web-group /src/node_modules ./node_modules
 COPY --from=prune --chown=web-user:web-group /src/out/json/ .
-COPY --from=builder --chown=web-user/web-group /src/.next ./.next
-COPY --from=builder --chown=web-user:web-group /src/public/ ./public
+COPY --from=builder --chown=web-user/web-group /src/apps/frontend/.next ./.next
+COPY --from=builder --chown=web-user:web-group /src/apps/frontend/public/ ./public
 EXPOSE 3000
-CMD [ "npm", "run", "dev" ]
+CMD ["next", "dev"]
 

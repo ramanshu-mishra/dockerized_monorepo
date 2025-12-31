@@ -41,11 +41,11 @@ FROM base AS runner
 WORKDIR /src
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
-RUN addgroup --system --gid 1001 web-user
+RUN addgroup --system --gid 1001 web-group
 RUN adduser --system --uid 1001 web-user
 USER web-user
 COPY --from=installer-production --chown=web-user:web-group /src/node_modules ./node_modules
 COPY --from=prune --chown=web-user:web-group /src/out/json/ .
 COPY --from=builder --chown=web-user:web-group /src/apps/backend/dist/ ./dist
 EXPOSE 3001
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/index.js"]
